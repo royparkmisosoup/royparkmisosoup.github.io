@@ -196,6 +196,14 @@ body.board-view #people .gallery .frame{aspect-ratio:4 / 3;height:auto;overflow:
 body.board-view #people .gallery .frame img{position:absolute;inset:0;width:100%;height:100%;max-height:none;object-fit:cover;object-position:center}
 body.board-view #people .gallery .frame img[data-photo="5174"]{object-position:right center}
 body.board-view #people .gallery .frame img[data-photo="3277"]{object-position:50% center}
+
+/* Equal-border photo stacks on the collection landing page. */
+.collection-card .cover img{border:12px solid #fffefa;box-shadow:0 4px 7px #302b2014,0 14px 26px #302b2020}
+.collection-card .cover:after{display:none}
+.card-label strong{display:block;font:28px/1.2 'Bradley Hand','Segoe Print','Comic Sans MS',cursive;color:#45413b;letter-spacing:-.5px}
+.card-label{border:0;padding-top:12px}
+.collection-card .cover{margin-bottom:20px}
+@media(max-width:650px){.collection-card .cover img{border-width:10px}.collection-card .cover{aspect-ratio:4/3}}
 </style>
 </head>
 <body>
@@ -241,6 +249,14 @@ const curtain=document.querySelector('#transition-curtain');
 const coverPhoto=gallery.querySelector('img').cloneNode();coverPhoto.loading='eager';coverPhoto.alt='South Korea collection';document.querySelector('.korea-cover').append(coverPhoto);
 const italyCover=document.querySelector('#italy [data-photo="5409"]').cloneNode();italyCover.loading='eager';italyCover.alt='Italy collection';document.querySelector('.italy-cover').append(italyCover);
 const peopleCover=document.querySelector('#people [data-photo="3013"]').cloneNode();peopleCover.loading='eager';peopleCover.alt='People collection';document.querySelector('.third-cover').append(peopleCover);
+// Real photographs peek out behind each collection cover.
+for(const [coverSelector, gallerySelector] of [['.korea-cover','#south-korea'],['.italy-cover','#italy'],['.third-cover','#people']]){
+ const cover=document.querySelector(coverSelector);
+ const photos=[...document.querySelectorAll(gallerySelector+' .frame img')];
+ const front=cover.querySelector('img');
+ const behind=photos.filter(photo=>photo.getAttribute('src')!==front.getAttribute('src')).slice(0,2);
+ behind.forEach((photo,index)=>{const image=photo.cloneNode();image.className=index===0?'stack-back':'stack-mid';image.alt='';image.setAttribute('aria-hidden','true');image.loading='eager';cover.append(image)});
+}
 let changing=false;
 const revealObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.remove('waiting-reveal');revealObserver.unobserve(entry.target)}})},{threshold:0.08});
 function prepareExhibition(page){revealObserver.disconnect();document.querySelectorAll('.waiting-reveal').forEach(el=>el.classList.remove('waiting-reveal'));if(!page||matchMedia('(prefers-reduced-motion: reduce)').matches)return;page.querySelectorAll('figure').forEach(el=>{el.classList.add('waiting-reveal');revealObserver.observe(el)})}
